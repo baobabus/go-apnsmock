@@ -4,6 +4,8 @@
 APNS Mock is a configurable emulator of Apple Push Notification HTTP/2 service written in Go.
 An embeddable server as well as a standalone command line utility are provided.
 
+[![Build Status](https://travis-ci.org/baobabus/go-apnsmock.svg?branch=master)](https://travis-ci.org/baobabus/go-apnsmock)
+
 ## Features
 
 - Emulation of new Apple Push Notification service based on HTTP/2 protocol
