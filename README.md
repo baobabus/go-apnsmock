@@ -1,5 +1,4 @@
 # Go APNS Mock
-==============
 
 APNS Mock is a configurable emulator of Apple Push Notification HTTP/2 service written in Go.
 An embeddable server as well as a standalone command line utility are provided.
@@ -9,11 +8,11 @@ An embeddable server as well as a standalone command line utility are provided.
 ## Features
 
 - Emulation of new Apple Push Notification service based on HTTP/2 protocol
-- Configurable connection handling options (stream consurrency, latency, etc.)
+- Configurable connection handling options (stream concurrency, latency, etc.)
 - Emulation of token-based authentication (JWT)
 - Emulation of TLS client certificate-based authentication (coming)
-- Preconfigured set of request handling scenarios including many deterministic failure cases.
-- Support for custom request handling scenarios.
+- Preconfigured set of request handling scenarios including many deterministic failure cases
+- Support for custom request handling scenarios
 - Support for Go 1.7 and later
 
 ## Command line
