@@ -1,6 +1,6 @@
 // Copyright 2017 Aleksey Blinov. All rights reserved.
 
-package apns2
+package example
 
 import (
 	"strings"
