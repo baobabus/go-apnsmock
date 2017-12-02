@@ -1,5 +1,32 @@
 // Copyright 2017 Aleksey Blinov. All rights reserved.
 
+// go-apnsmock is a command line tool that can be used to run a standalone
+// APNS emulator.
+//
+// Usage:
+// 
+//   go-apnsmock <flags>
+// 
+// Flags:
+// 
+//   -addr address
+//     	network address to serve on (default "127.0.0.1:8443")
+//   -allok
+//     	if allok is true, server will respond with 200 status to all requests
+//   -cert path
+//     	path to server TLS certificate (default "certs/server.crt")
+//   -conn-delay time
+//     	amount of time by which client connect attempts should be delayed (default 100ms)
+//   -conns number
+//     	maximum number of concurrent HTTP/2 connections (default 5)
+//   -key path
+//     	path to TLS certificate key (default "certs/server.key")
+//   -resp-delay time
+//     	amount of time by which responses should be delayed (default 5ms)
+//   -streams number
+//     	number of concurrent HTTP/2 streams (default 500)
+//   -verbose
+//     	if true, verbose enables http2 verbose logging
 package main
 
 import (
