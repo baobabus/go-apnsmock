@@ -18,7 +18,7 @@ func TestRoundtrip(t *testing.T) {
 
 	// client is preconfigured for communication with the server
 	client := s.Client()
-	url := s.URL + apns2mock.RequestPath
+	url := s.URL + apns2mock.RequestRoot
 	cont := "application/json; charset=utf-8"
 
 	// Expecting to get 200 back

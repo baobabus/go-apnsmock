@@ -14,6 +14,9 @@ import (
 	"golang.org/x/net/http2"
 )
 
+// APNS default root URL path.
+const RequestRoot = "/3/device/"
+
 // CommsCfg can be used to configure communications aspects of the mock server.
 type CommsCfg struct {
 
@@ -34,37 +37,33 @@ type CommsCfg struct {
 	ResponseTime time.Duration
 }
 
-var (
-	RequestPath = "/3/device/"
-
-	TypicalCommsCfg = CommsCfg{
+// TypicalCommsCfg contains settings that emulate typical latency and
+// connection handling behavior of actual APNS servers.
+var TypicalCommsCfg = CommsCfg{
 		MaxConcurrentStreams: 500,
 		MaxConns:             1000,
 		ConnectionDelay:      1 * time.Second,
 		ResponseTime:         20 * time.Millisecond,
 	}
 
-	NoDelayCommsCfg = CommsCfg{
+// NoDelayCommsCfg contains settings that do not introduce any additional delay
+// in the mock server handling of the requests and incoming client connections.
+var NoDelayCommsCfg = CommsCfg{
 		MaxConcurrentStreams: 500,
 		MaxConns:             1000,
 		ConnectionDelay:      0,
 		ResponseTime:         0,
 	}
 
-	// AutoCert can be supplied to NewServer as certFile argument instead of ""
-	// for improved semantics indicating that server certificate and key
-	// should be auto-generated.
-	AutoCert = ""
+// AutoCert can be supplied to NewServer as certFile argument instead of ""
+// for improved semantics indicating that server certificate and key
+// should be auto-generated.
+const AutoCert = ""
 
-	// AutoKey can be supplied to NewServer as keyFile argument instead of ""
-	// for improved semantics indicating that server certificate and key
-	// should be auto-generated.
-	AutoKey = ""
-)
-
-var (
-	ErrMissingHandler = errors.New("apns2mock: no handler supplied.")
-)
+// AutoKey can be supplied to NewServer as keyFile argument instead of ""
+// for improved semantics indicating that server certificate and key
+// should be auto-generated.
+const AutoKey = ""
 
 // Server represents a mock APNS service. See NewServer for information
 // on creating servers.
@@ -85,18 +84,18 @@ type Server struct {
 }
 
 // NewServer creates and starts a new Server instance with handler servicing
-// requests on RequestPath and with all other paths returning 404 status.
+// requests on RequestRoot and with all other paths returning 404 status.
 // If certFile and keyFile are not empty, the server TLS certicicate will be
 // loaded from the specified files.
 //
 // If either certFile or keyFile is empty a new self-signed certificate
 // will be created. This is usually all that is needed for integrating
-// mock server in unit tests. Simply use server's pre-configured client
+// mock server in automated tests. Simply use server's pre-configured client
 // for your testing or retrieve server's URL and root certificate to configure
 // your custom client.
 func NewServer(commsCfg CommsCfg, handler http.Handler, certFile string, keyFile string) (*Server, error) {
 	if handler == nil {
-		return nil, ErrMissingHandler
+		return nil, errors.New("apns2mock: no handler supplied.")
 	}
 	mux := http.NewServeMux()
 	itcpr := &atomic.Value{}
@@ -107,7 +106,7 @@ func NewServer(commsCfg CommsCfg, handler http.Handler, certFile string, keyFile
 		}
 		return false
 	}
-	mux.HandleFunc(RequestPath, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(RequestRoot, func(w http.ResponseWriter, r *http.Request) {
 		if tryIntercept(w) {
 			return
 		}
@@ -124,7 +123,7 @@ func NewServer(commsCfg CommsCfg, handler http.Handler, certFile string, keyFile
 		respErr(w, 404, "BadPath")
 	})
 	srv := httptest.NewUnstartedServer(mux)
-	srv.Listener = &CappedConnListener{
+	srv.Listener = &cappedConnListener{
 		Listener: srv.Listener,
 		Cap:      commsCfg.MaxConns,
 		Delay:    commsCfg.ConnectionDelay,
@@ -166,9 +165,9 @@ func (s *Server) Client() *http.Client {
 // BecomeUnavailable makes server begin responding with specified status code
 // and reason to any future requests. This is typically used to test handling
 // of 5XX status codes by clients.
-func (s *Server) BecomeUnavailable(status int, reason string) {
+func (s *Server) BecomeUnavailable(statusCode int, reason string) {
 	s.interceptor.Store(func(w http.ResponseWriter) bool {
-		respErr(w, status, reason)
+		respErr(w, statusCode, reason)
 		return true
 	})
 }

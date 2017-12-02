@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -24,10 +25,48 @@ Usage:
 Flags:
 `
 
+// loopbackAddr returns loopback interface IP address as a string or empty
+// string if no loopback interface can be found.
+// loopbackAddr prefers IP4 addresses over IP6.
+func loopbackAddr() string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return ""
+	}
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagLoopback != 0 {
+			addrs, err := iface.Addrs()
+			if err != nil {
+				return ""
+			}
+			ip4 := ""
+			ip6 := ""
+			for _, addr := range addrs {
+				var ip net.IP
+				switch v := addr.(type) {
+				case *net.IPNet:
+					ip = v.IP
+				case *net.IPAddr:
+					ip = v.IP
+				}
+				if t := ip.To4(); len(t) == net.IPv4len {
+					ip4 = t.String()
+				} else {
+					ip6 = t.String()
+				}
+			}
+			if ip4 != "" {
+				return ip4
+			}
+			return ip6
+		}
+	}
+	return ""
+}
+
 func main() {
 
-	lb := apns2mock.LoopbackAddr()
-
+	lb := loopbackAddr()
 	fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	addr := fs.String("addr", lb+":8443", "network `address` to serve on")
 	certFile := fs.String("cert", "certs/server.crt", "`path` to server TLS certificate")

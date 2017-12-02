@@ -33,6 +33,8 @@ type APNSRequest struct {
 	Payload map[string]interface{}
 }
 
+type HadlerFunc func(req *APNSRequest) (statusCode int, rejectionReason string)
+
 // AllOkayHandler always respons with status 200 and a valid APN ID.
 var AllOkayHandler = allOkayHandler{}
 
@@ -44,7 +46,7 @@ func (h allOkayHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	RegEx_DeviceToken = regexp.MustCompile("[[:xdigit:]]+")
+	regEx_DeviceToken = regexp.MustCompile("[[:xdigit:]]+")
 )
 
 // CaseHandler handles all requests rooted at /3/device/ path.
@@ -64,7 +66,7 @@ type CaseHandler struct {
 	//
 	// If none of the case handlers return non-zero status code, as 200
 	// successful response is sent back to the client.
-	CaseHandlers []func(req *APNSRequest) (statusCode int, rejectionReason string)
+	CaseHandlers []HadlerFunc
 }
 
 // ServeHTTP serves all incoming HTTP requests. It performs initial
@@ -75,8 +77,8 @@ func (h *CaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.respErr(w, 405, "MethodNotAllowed")
 		return
 	}
-	dt := r.URL.Path[len(RequestPath):]
-	if !RegEx_DeviceToken.MatchString(dt) {
+	dt := r.URL.Path[len(RequestRoot):]
+	if !regEx_DeviceToken.MatchString(dt) {
 		h.respErr(w, 400, "BadDeviceToken")
 		return
 	}

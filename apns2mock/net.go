@@ -8,49 +8,10 @@ import (
 	"time"
 )
 
-// LoopbackAddr returns loopback interface IP address as a string or empty
-// string if no loopback interface can be found.
-// LoopbackAddr prefers IP4 addresses over IP6.
-func LoopbackAddr() string {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return ""
-	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagLoopback != 0 {
-			addrs, err := iface.Addrs()
-			if err != nil {
-				return ""
-			}
-			ip4 := ""
-			ip6 := ""
-			for _, addr := range addrs {
-				var ip net.IP
-				switch v := addr.(type) {
-				case *net.IPNet:
-					ip = v.IP
-				case *net.IPAddr:
-					ip = v.IP
-				}
-				if t := ip.To4(); len(t) == net.IPv4len {
-					ip4 = t.String()
-				} else {
-					ip6 = t.String()
-				}
-			}
-			if ip4 != "" {
-				return ip4
-			}
-			return ip6
-		}
-	}
-	return ""
-}
-
-// CappedConnListener extends net.Listener by adding the ability to limit
+// cappedConnListener extends net.Listener by adding the ability to limit
 // the number of concurrent connections that it accepts. Calls to Accept()
 // can additionally be delayed by a specified amount.
-type CappedConnListener struct {
+type cappedConnListener struct {
 	net.Listener
 
 	// Cap specifies the maximum number of concurrent connections.
@@ -66,7 +27,7 @@ type CappedConnListener struct {
 }
 
 // See net.Listener.Accept() for more information.
-func (l *CappedConnListener) Accept() (res net.Conn, err error) {
+func (l *cappedConnListener) Accept() (res net.Conn, err error) {
 	for {
 		res, err = l.Listener.Accept()
 		if res == nil || err != nil {
@@ -91,7 +52,7 @@ func (l *CappedConnListener) Accept() (res net.Conn, err error) {
 
 type netConn struct {
 	*net.TCPConn
-	l *CappedConnListener
+	l *cappedConnListener
 }
 
 func (c *netConn) Close() error {

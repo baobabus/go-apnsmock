@@ -46,10 +46,10 @@ Flags:
     	if true, verbose enables http2 verbose logging
 ```
 
-## Embedding in unit tests
+## Embedding in automated tests
 
-Instances of `apns2mock.Server` can be easily embedded in unit tests. Any number of server instances
-can be concurrently instantiated while providing complete isolation from each other.
+Instances of `apns2mock.Server` can be easily embedded in automated tests.
+Any number of server instances can be concurrently instantiated while providing complete isolation from each other.
 
 Unit test example
 
@@ -72,7 +72,7 @@ func TestRoundtrip(t *testing.T) {
 
 	// client is preconfigured for communication with the server
 	client := s.Client()
-	url := s.URL + apns2mock.RequestPath
+	url := s.URL + apns2mock.RequestRoot
 	cont := "application/json; charset=utf-8"
 
 	// Expecting to get 200 back
