@@ -8,13 +8,37 @@ An embeddable server as well as a standalone command line utility are provided.
 
 ## Features
 
-- Emulation of new Apple Push Notification service based on HTTP/2 protocol
+- Emulation of new Apple Push Notification service over HTTP/2 protocol
 - Configurable connection handling options (stream concurrency, latency, etc.)
 - Emulation of token-based authentication (JWT)
 - Emulation of TLS client certificate-based authentication (coming)
 - Preconfigured set of request handling scenarios including many deterministic failure cases
 - Support for custom request handling scenarios
-- Support for Go 1.7 and later
+- Supports Go 1.7 and later
+
+## Request validation
+
+- Request methods other than POST 405, "MethodNotAllowed".
+- Non-hexadecimal device tokens return 400, "BadDeviceToken".
+- Missing or incorrect authorization header returns 403, "MissingProviderToken".
+- Malformed JWT headres/claims return 403, "InvalidProviderToken".
+- Missing request body returns 400, "PayloadEmpty".
+- Invalid UUID format in APNS Id returns 400, "BadMessageId".
+- Priority that is not empty, 5 or 10 returns 400, "BadPriority".
+- Empty topic returns 400, "MissingTopic".
+- Collapse Ids longer than 64 return 400, "BadCollapseId".
+- Expiration date that cannot be parsed returns 400, "BadExpirationDate".
+- Expired tokens return 403, "ExpiredProviderToken".
+- Tokens with incorrct signing algorithm return 403, "InvalidProviderToken".
+
+## Precofigured failure scenarios
+
+- Device tokens starting with '1' return 400, "BadDeviceToken".
+- Device tokens starting with '2' return 410, "Unregistered".
+- Device tokens starting with the same letter/digit as APNS topic return 400, "DeviceTokenNotForTopic".
+- Topics starting with 'd' return 400, "TopicDisallowed".
+- Team ID (JWT "iss" claim) starting with '1' return 403, "InvalidProviderToken".
+
 
 ## Command line
 
