@@ -16,28 +16,50 @@ An embeddable server as well as a standalone command line utility are provided.
 - Support for custom request handling scenarios
 - Supports Go 1.7 and later
 
+## Handling of mock communications
+
+The ability to mock various communication scenarios is the primary goal of APNS Mock package.
+The following comms-related parameters can be customized to help with testing of your APNS clients.
+
+- Connection delay - simulate long connection delays or set it to 0
+- Response time - configure how long the server takes to respond to a request
+- Maximum number of open connections - test how well your client handles refused connections
+- Maximum number of concurrent HTTP/2 streams - test how your client handles low and high numbers
+
+In addition to the above, you can programmaticaly instruct the mock server to become unavailable
+or to resume normal processing at any point so that you can test your client's handling of such scenarios.
+
+
 ## Request validation
 
-- Request methods other than POST 405, "MethodNotAllowed".
-- Non-hexadecimal device tokens return 400, "BadDeviceToken".
-- Missing or incorrect authorization header returns 403, "MissingProviderToken".
-- Malformed JWT headres/claims return 403, "InvalidProviderToken".
-- Missing request body returns 400, "PayloadEmpty".
-- Invalid UUID format in APNS Id returns 400, "BadMessageId".
-- Priority that is not empty, 5 or 10 returns 400, "BadPriority".
-- Empty topic returns 400, "MissingTopic".
-- Collapse Ids longer than 64 return 400, "BadCollapseId".
-- Expiration date that cannot be parsed returns 400, "BadExpirationDate".
-- Expired tokens return 403, "ExpiredProviderToken".
-- Tokens with incorrct signing algorithm return 403, "InvalidProviderToken".
+The following validation is performed by the default request handler:
+
+- Request methods other than POST return 405, "MethodNotAllowed"
+- Non-hexadecimal device tokens return 400, "BadDeviceToken"
+- Missing or incorrect authorization header returns 403, "MissingProviderToken"
+- Malformed JWT headres/claims return 403, "InvalidProviderToken"
+- Tokens with incorrct signing algorithm return 403, "InvalidProviderToken"
+- Missing request body returns 400, "PayloadEmpty"
+- Invalid UUID format in APNS Id returns 400, "BadMessageId"
+- Priority that is not empty, 5 or 10 returns 400, "BadPriority"
+- Empty topic returns 400, "MissingTopic"
+- Collapse Ids longer than 64 return 400, "BadCollapseId"
+- Expiration date that cannot be parsed returns 400, "BadExpirationDate"
+- Expired tokens return 403, "ExpiredProviderToken"
+
+Or use AllOkayHandler if request validation is not desired. 
 
 ## Precofigured failure scenarios
 
-- Device tokens starting with '1' return 400, "BadDeviceToken".
-- Device tokens starting with '2' return 410, "Unregistered".
-- Device tokens starting with the same letter/digit as APNS topic return 400, "DeviceTokenNotForTopic".
-- Topics starting with 'd' return 400, "TopicDisallowed".
-- Team ID (JWT "iss" claim) starting with '1' return 403, "InvalidProviderToken".
+The following scenarios produce mock rejection responses:
+
+- Device tokens starting with '1' return 400, "BadDeviceToken"
+- Device tokens starting with '2' return 410, "Unregistered"
+- Device tokens starting with the same letter/digit as APNS topic return 400, "DeviceTokenNotForTopic"
+- Topics starting with 'd' return 400, "TopicDisallowed"
+- Team IDs (JWT "iss" claims) starting with '1' return 403, "InvalidProviderToken"
+
+Setting you request handler to AllOkayHandler will turn off mock push rejections. 
 
 
 ## Command line
