@@ -40,20 +40,20 @@ type CommsCfg struct {
 // TypicalCommsCfg contains settings that emulate typical latency and
 // connection handling behavior of actual APNS servers.
 var TypicalCommsCfg = CommsCfg{
-		MaxConcurrentStreams: 500,
-		MaxConns:             1000,
-		ConnectionDelay:      1 * time.Second,
-		ResponseTime:         20 * time.Millisecond,
-	}
+	MaxConcurrentStreams: 500,
+	MaxConns:             1000,
+	ConnectionDelay:      1 * time.Second,
+	ResponseTime:         20 * time.Millisecond,
+}
 
 // NoDelayCommsCfg contains settings that do not introduce any additional delay
 // in the mock server handling of the requests and incoming client connections.
 var NoDelayCommsCfg = CommsCfg{
-		MaxConcurrentStreams: 500,
-		MaxConns:             1000,
-		ConnectionDelay:      0,
-		ResponseTime:         0,
-	}
+	MaxConcurrentStreams: 500,
+	MaxConns:             1000,
+	ConnectionDelay:      0,
+	ResponseTime:         0,
+}
 
 // AutoCert can be supplied to NewServer as certFile argument instead of ""
 // for improved semantics indicating that server certificate and key
